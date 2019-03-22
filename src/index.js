@@ -1,3 +1,8 @@
-import VueFroala from './vue-froala'
+import { froalaEditor, froalaView } from "./vue-froala";
 
-export default VueFroala
+export default (Vue, Options = {}) => {
+  Vue.component("Froala", froalaEditor);
+  Vue.component("FroalaView", froalaView);
+};
+
+export { froalaEditor, froalaView };

@@ -1,4 +1,4 @@
-var froalaEditorFunctionality = {
+var froalaEditor = {
 
   props: ['tag', 'value', 'config', 'onManualControllerReady'],
 
@@ -271,7 +271,7 @@ var froalaEditorFunctionality = {
   }    
 };
 
-var froalaViewFunctionality = {
+var froalaView = {
 
   props: ['tag', 'value'],
 
@@ -312,11 +312,4 @@ var froalaViewFunctionality = {
   }
 };
 
-export default (Vue, Options = {}) => {
-
-  Vue.component('Froala', froalaEditorFunctionality);
-
-  Vue.component('FroalaView', froalaViewFunctionality);
-}
-
-export {froalaEditorFunctionality, froalaViewFunctionality};
+export {froalaEditor, froalaView};

@@ -1,4 +1,4 @@
-var froalaEditorFunctionality = {
+var froalaEditor = {
   props: ['tag', 'value', 'config', 'onManualControllerReady'],
   watch: {
     value: function value() {
@@ -221,7 +221,7 @@ var froalaEditorFunctionality = {
     }
   }
 };
-var froalaViewFunctionality = {
+var froalaView = {
   props: ['tag', 'value'],
   watch: {
     value: function value(newValue) {
@@ -251,9 +251,11 @@ var froalaViewFunctionality = {
     };
   }
 };
-var VueFroala = (function (Vue) {
-  Vue.component('Froala', froalaEditorFunctionality);
-  Vue.component('FroalaView', froalaViewFunctionality);
+
+var index = (function (Vue) {
+  Vue.component("Froala", froalaEditor);
+  Vue.component("FroalaView", froalaView);
 });
 
-export default VueFroala;
+export default index;
+export { froalaEditor, froalaView };
