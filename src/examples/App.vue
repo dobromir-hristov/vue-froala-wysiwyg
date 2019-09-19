@@ -8,7 +8,7 @@
       <input v-model="myTitle"/>
     </div>
 
-    <div class="sample">
+     <div class="sample">
       <h2>Sample 2: Full Editor</h2>
       <froala v-model="content"></froala>
       <h4>Rendered Content:</h4>
@@ -17,8 +17,8 @@
 
     <div class="sample">
       <h2>Sample 3: Two way binding</h2>
-      <froala v-model="twoWayContent"></froala>
-      <froala v-model="twoWayContent"></froala>
+      <froala id="sample3" v-model="twoWayContent"></froala>
+      <froala id="sample4" v-model="twoWayContent"></froala>
     </div>
 
     <div class="sample">
@@ -26,20 +26,20 @@
       <button class="manual" v-on:click="createEditor()" v-if="!showEditor">Initialize Editor</button>
       <button v-on:click="destroyEditor()" v-if="showEditor">Close Editor</button>
       <button v-on:click="deleteAll()" v-if="showEditor">Delete All</button>
-      <froala :onManualControllerReady="initialize" v-model="sample3Text">Check out the <a href="https://www.froala.com/wysiwyg-editor">Froala Editor</a></froala>
+      <froala id="sample5" :onManualControllerReady="initialize" v-model="sample3Text">Check out the <a href="https://www.froala.com/wysiwyg-editor">Froala Editor</a></froala>
     </div>
 
     <div class="sample">
       <h2>Sample 5: Editor on 'img' tag. Two way binding. Style is ignored (vueIgnoreAttrs) and will not be updated in the model.</h2>
-      <froala :tag="'img'" :config="imageOptions" v-model="imgModel"></froala>
-      <froala :tag="'img'" :config="imageOptions" v-model="imgModel"></froala>
+      <froala id="sample6" :tag="'img'" :config="imageOptions" v-model="imgModel"></froala>
+      <froala id="sample7" :tag="'img'" :config="imageOptions" v-model="imgModel"></froala>
       <h4>Model Obj:</h4>
       <div>{{imgModel}}</div>
     </div>
 
     <div class="sample">
       <h2>Sample 6: Editor on 'button' tag</h2>
-      <froala :tag="'button'" v-model="buttonModel"></froala>
+      <froala id="sample8" :tag="'button'" v-model="buttonModel"></froala>
       <h4>Model Obj:</h4>
       <div>{{buttonModel}}</div>
     </div>
@@ -47,7 +47,7 @@
 
     <div class="sample">
       <h2>Sample 7: Editor on 'input' tag</h2>
-      <froala :tag="'input'" v-model="inputModel"></froala>
+      <froala id="sample9" :tag="'input'" v-model="inputModel"></froala>
       <h4>Model Obj:</h4>
       <div>{{inputModel}}</div>
     </div>
@@ -57,7 +57,7 @@
       <button class="manual" v-on:click="linkCreateEditor()" v-if="!linkShowEditor">Initialize Editor</button>
       <button v-on:click="linkDestroyEditor()" v-if="linkShowEditor">Close Editor</button>
       <div>
-        <froala class="blabla" :tag="'a'" :onManualControllerReady="initializeLink" v-model="linkModel">Froala Editor</froala>
+        <froala id="sample10" class="blabla" :tag="'a'" :onManualControllerReady="initializeLink" v-model="linkModel">Froala Editor</froala>
       </div>
       <h4>Model Obj:</h4>
       <div>{{linkModel}}</div>
@@ -67,8 +67,6 @@
 </template>
 
 <script>
-import VueFroala from 'src';
-
 export default {
   name: 'app',
   data () {
@@ -81,8 +79,8 @@ export default {
         charCounterCount: false,
         toolbarInline: true,
         events: {
-          'froalaEditor.initialized': function() {
-            console.log('initialized');
+          'initialized': function() {
+            console.log('initialized', this);
           }
         }
       },
@@ -109,9 +107,9 @@ export default {
       initialize: (initControls) => {
         this.initControls = initControls;
         this.deleteAll = () => {
-            this.initControls.getEditor()('html.set', '');
-            this.initControls.getEditor()('undo.reset');
-            this.initControls.getEditor()('undo.saveStep');
+            this.initControls.getEditor().html.set('');
+            this.initControls.getEditor().undo.reset();
+            this.initControls.getEditor().undo.saveStep();
         };
       },
 

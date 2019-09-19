@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/dm/vue-froala-wysiwyg.svg)](https://www.npmjs.com/package/vue-froala-wysiwyg)
 [![npm](https://img.shields.io/npm/l/vue-froala-wysiwyg.svg)](https://www.npmjs.com/package/vue-froala-wysiwyg)
 
->vue-froala-wyswiyg provides Vue bindings to the Froala WYSIWYG editor VERSION 2.
+>vue-froala-wyswiyg provides Vue bindings to the Froala WYSIWYG editor VERSION 3.
 
 ## Compatibility
 
@@ -29,28 +29,19 @@ npm install vue-froala-wysiwyg --save
 
 #### main.js file:
 ```javascript
-...
-
-// Require Froala Editor js file.
-require('froala-editor/js/froala_editor.pkgd.min.js')
-
-// Require Froala Editor css files.
-require('froala-editor/css/froala_editor.pkgd.min.css')
-require('font-awesome/css/font-awesome.css')
-require('froala-editor/css/froala_style.min.css')
+// Import Froala Editor css files.
+import 'froala-editor/css/froala_editor.pkgd.min.css';
 
 // Import and use Vue Froala lib.
 import VueFroala from 'vue-froala-wysiwyg'
 Vue.use(VueFroala)
-
-...
 ```
 
 #### App.vue file:
 ```javascript
 <template>
   <div id="app">
-    <froala :tag="'textarea'" :config="config" v-model="model"></froala>
+    <froala id="edit" :tag="'textarea'" :config="config" v-model="model"></froala>
   </div>
 </template>
 
@@ -63,7 +54,7 @@ export default {
     return {
       config: {
         events: {
-          'froalaEditor.initialized': function () {
+          initialized: function () {
             console.log('initialized')
           }
         }
@@ -77,7 +68,7 @@ export default {
 
 
 
-#### 2. Make sure you have the right Webpack settings for loading the CSS files, Font Awesome and jQuery.
+#### 2. Make sure you have the right Webpack settings for loading the CSS files.
 
 ```javascript
 var webpack = require('webpack')
@@ -93,17 +84,8 @@ module.exports = {
       {
         test: /\.css$/,
         loader: 'vue-style-loader!css-loader'
-      },
-
-      // Font awesome loader.
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url',
-        query: {
-          limit: 10000,
-          name: path.posix.join('path/to/yours/assets/directory', 'fonts/[name].[hash:7].[ext]')
-        }
       }
+
     ]
   },
   vue: {
@@ -114,21 +96,9 @@ module.exports = {
       // Css loader for Webpack 1.x .
       css: 'vue-style-loader!css-loader'
     }
-  },
-  plugins: [
-
-    // ...
-
-    // Jquery loader plugin.
-    new webpack.ProvidePlugin({
-      $: "jquery",
-      jQuery: "jquery"
-    })
-  ]
+  }
 })
 ```
-
-
 
 ## Usage
 
@@ -171,7 +141,7 @@ Events can be passed in with the options, with a key events and object where the
 config: {
   placeholder: "Edit Me",
   events : {
-    'froalaEditor.focus' : function(e, editor) {
+    focus : function(e, editor) {
       console.log(editor.selection.get());
     }
   }
@@ -229,7 +199,55 @@ config: {
   vueIgnoreAttrs: ['class', 'id']
 }
  ```
+### Custom Buttons
 
+You can pass the custom buttons to the editor by following way:
+#### App.vue file:
+```javascript
+<script>
+import FroalaEditor from 'froala-editor';
+
+FroalaEditor.DefineIcon('alert', {NAME: 'info', SVG_KEY: 'help'});
+  FroalaEditor.RegisterCommand('alert', {
+    title: 'Hello',
+    focus: false,
+    undo: false,
+    refreshAfterCallback: false,
+    callback: function () {
+      alert('Hello!');
+    }
+  });
+
+  FroalaEditor.DefineIcon('clear', {NAME: 'remove', SVG_KEY: 'remove'});
+  FroalaEditor.RegisterCommand('clear', {
+    title: 'Clear HTML',
+    focus: false,
+    undo: true,
+    refreshAfterCallback: true,
+    callback: function () {
+      this.html.set('');
+      this.events.focus();
+    }
+  });
+
+  FroalaEditor.DefineIcon('insert', {NAME: 'plus', SVG_KEY: 'add'});
+  FroalaEditor.RegisterCommand('insert', {
+    title: 'Insert HTML',
+    focus: true,
+    undo: true,
+    refreshAfterCallback: true,
+    callback: function () {
+      this.html.insert('My New HTML');
+    }
+  });
+  </script>
+  
+ ```
+ Now you can use these buttons in options:
+ ```javascript
+ toolbarButtons: [['undo', 'redo' , 'bold'], ['alert', 'clear', 'insert']],
+
+ ```
 
 
 ## Manual Instantiation
@@ -242,9 +260,9 @@ Gets the functionality to operate on the editor: create, destroy and get editor 
 initialize: function(initControls) {
   this.initControls = initControls;
   this.deleteAll = () => {
-      this.initControls.getEditor()('html.set', '');
-      this.initControls.getEditor()('undo.reset');
-      this.initControls.getEditor()('undo.saveStep');
+      this.initControls.getEditor().html.set('');
+      this.initControls.getEditor().undo.reset();
+      this.initControls.getEditor().undo.saveStep();
   };
 }
 ```

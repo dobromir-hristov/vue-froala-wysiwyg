@@ -1,11 +1,13 @@
+import FroalaEditor from 'froala-editor'
+
 var froalaEditor = {
 
   props: ['tag', 'value', 'config', 'onManualControllerReady'],
 
   watch: {
     value: function () {
-      this.model = this.value;
-      this.updateValue();
+      this.model = this.value
+      this.updateValue()
     }
   },
 
@@ -17,41 +19,37 @@ var froalaEditor = {
   },
 
   created: function () {
-    this.currentTag = this.tag || this.currentTag;
-    this.model = this.value;
+    this.currentTag = this.tag || this.currentTag
+    this.model = this.value
   },
 
   // After first time render.
-  mounted: function() {
+  mounted: function () {
     if (this.SPECIAL_TAGS.indexOf(this.currentTag) != -1) {
 
-      this.hasSpecialTag = true;
+      this.hasSpecialTag = true
     }
 
     if (this.onManualControllerReady) {
-      this.generateManualController();
+      this.generateManualController()
     } else {
-      this.createEditor();
+      this.createEditor()
     }
   },
 
-  beforeDestroy: function() {
-    this.destroyEditor();
+  beforeDestroy: function () {
+    this.destroyEditor()
   },
 
   data: function () {
 
     return {
 
-      // Tag on which the editor is initialized.
+      initEvents: [],// Tag on which the editor is initialized.
       currentTag: 'div',
-      listeningEvents: [],
-
-      // Jquery wrapped element.
-      _$element: null,
 
       // Editor element.
-      _$editor: null,
+      _editor: null,
 
       // Current config.
       currentConfig: null,
@@ -70,206 +68,230 @@ var froalaEditor = {
 
       model: null,
       oldModel: null
-    };
+    }
   },
   methods: {
-    updateValue: function() {
+    updateValue: function () {
       if (JSON.stringify(this.oldModel) == JSON.stringify(this.model)) {
-        return;
+        return
       }
 
-      this.setContent();
+      this.setContent()
     },
 
-    createEditor: function() {
+    createEditor: function () {
 
       if (this.editorInitialized) {
-        return;
+        return
       }
 
-      this.currentConfig = this.config || this.defaultConfig;
+      this.currentConfig = this.config || this.defaultConfig
 
-      this._$element = jQuery(this.$el);
-      
-      
-      
-      this.setContent(true);
+      this.setContent(true)
 
-      this.registerEvents();
-      this._$editor = this._$element.froalaEditor(this.currentConfig).data('froala.editor').$el;
-      this.initListeners();
+      // Bind editor events.
+      this.registerEvents()
+      this.initListeners()
 
-      this.editorInitialized = true;
+      this._editor = new FroalaEditor(this.$el, this.currentConfig)
+      this.editorInitialized = true
     },
 
-    setContent: function(firstTime) {
+    setContent: function (firstTime) {
 
       if (!this.editorInitialized && !firstTime) {
-        return;
+        return
       }
 
       if (this.model || this.model == '') {
 
-        this.oldModel = this.model;
+        this.oldModel = this.model
 
         if (this.hasSpecialTag) {
-          this.setSpecialTagContent();
+          this.setSpecialTagContent()
         } else {
-          this.setNormalTagContent(firstTime);
+          this.setNormalTagContent(firstTime)
         }
       }
     },
 
-    setNormalTagContent: function(firstTime) {
+    setNormalTagContent: function (firstTime) {
 
-      var self = this;
+      var self = this
 
-      function htmlSet() {
-        self._$element.froalaEditor('html.set', self.model || '', true);
-        
+      function htmlSet () {
+        self._editor.html.set(self.model || '')
+
         //This will reset the undo stack everytime the model changes externally. Can we fix this?
-        
-        self._$element.froalaEditor('undo.saveStep');
-        self._$element.froalaEditor('undo.reset');
-        
+
+        self._editor.undo.saveStep()
+        self._editor.undo.reset()
+
       }
 
       if (firstTime) {
-        this.registerEvent(this._$element, 'froalaEditor.initialized', function () {
-          htmlSet();
-        });
+        this.registerEvent('initialized', function () {
+          htmlSet()
+        })
       } else {
-        htmlSet();
+        htmlSet()
       }
 
     },
 
-    setSpecialTagContent: function() {
+    setSpecialTagContent: function () {
 
-      var tags = this.model;
+      var tags = this.model
 
       // add tags on element
       if (tags) {
 
         for (var attr in tags) {
           if (tags.hasOwnProperty(attr) && attr != this.INNER_HTML_ATTR) {
-            this._$element.attr(attr, tags[attr]);
+            this.$el.setAttribute(attr, tags[attr])
           }
         }
 
         if (tags.hasOwnProperty(this.INNER_HTML_ATTR)) {
-          this._$element[0].innerHTML = tags[this.INNER_HTML_ATTR];
+          this.$el.innerHTML = tags[this.INNER_HTML_ATTR]
         }
       }
     },
 
-    destroyEditor: function() {
+    destroyEditor: function () {
 
-      if (this._$element) {
+      if (this._editor) {
 
-        this.listeningEvents && this._$element.off(this.listeningEvents.join(" "));
-        this._$editor.off('keyup');
-        this._$element.froalaEditor('destroy');
-        this.listeningEvents.length = 0;
-        this._$element = null;
-        this.editorInitialized = false;
+        this._editor.destroy()
+        this.editorInitialized = false
+        this._editor = null
+
       }
     },
 
-    getEditor: function() {
-      if (this._$element) {
-        return this._$element.froalaEditor.bind(this._$element);
-      }
-      return null;
+    getEditor: function () {
+
+      return this._editor
     },
 
-    generateManualController: function() {
+    generateManualController: function () {
 
-      var self = this;
       var controls = {
         initialize: this.createEditor,
         destroy: this.destroyEditor,
-        getEditor: this.getEditor,
-      };
+        getEditor: this.getEditor
+      }
 
-      this.onManualControllerReady(controls);
+      this.onManualControllerReady(controls)
     },
 
-    updateModel: function() {
+    updateModel: function () {
 
-      var modelContent = '';
+      var modelContent = ''
 
       if (this.hasSpecialTag) {
 
-        var attributeNodes = this._$element[0].attributes;
-        var attrs = {};
+        var attributeNodes = this.$el[0].attributes
+        var attrs = {}
 
-        for (var i = 0; i < attributeNodes.length; i++ ) {
+        for (var i = 0; i < attributeNodes.length; i++) {
 
-          var attrName = attributeNodes[i].name;
+          var attrName = attributeNodes[i].name
           if (this.currentConfig.vueIgnoreAttrs && this.currentConfig.vueIgnoreAttrs.indexOf(attrName) != -1) {
-            continue;
+            continue
           }
-          attrs[attrName] = attributeNodes[i].value;
+          attrs[attrName] = attributeNodes[i].value
         }
 
-        if (this._$element[0].innerHTML) {
-          attrs[this.INNER_HTML_ATTR] = this._$element[0].innerHTML;
+        if (this.$el[0].innerHTML) {
+          attrs[this.INNER_HTML_ATTR] = this.$el[0].innerHTML
         }
 
-        modelContent = attrs;
+        modelContent = attrs
       } else {
 
-        var returnedHtml = this._$element.froalaEditor('html.get');
+        var returnedHtml = this._editor.html.get()
         if (typeof returnedHtml === 'string') {
-          modelContent = returnedHtml;
+          modelContent = returnedHtml
         }
       }
 
-      this.oldModel = modelContent;
-      this.$emit('input', modelContent);
+      this.oldModel = modelContent
+      this.$emit('input', modelContent)
     },
 
-    initListeners: function() {
-      var self = this;
+    initListeners: function () {
+      var self = this
 
-      // bind contentChange and keyup event to froalaModel
-      this.registerEvent(this._$element, 'froalaEditor.contentChanged',function () {
-        self.updateModel();
-      });
-      if (this.currentConfig.immediateVueModelUpdate) {
-        this.registerEvent(this._$editor, 'keyup', function () {
-          self.updateModel();
-        });
+      this.registerEvent('initialized', function () {
+        if (self._editor.events) {// bind contentChange and keyup event to froalaModel
+          self._editor.events.on('contentChanged', function () {
+            self.updateModel()
+          })
+          if (self.currentConfig.immediateVueModelUpdate) {
+            self._editor.events.on('keyup', function () {
+              self.updateModel()
+            })
+          }
+        }
+      })
+    },
+
+    // register event on editor element
+    registerEvent: function (eventName, callback) {
+
+      if (!eventName || !callback) {
+        return
+      }
+
+      // Initialized event.
+      if (eventName == 'initialized') {
+
+        this.initEvents.push(callback)
+      } else {
+        if (!this.currentConfig.events) {
+          this.currentConfig.events = {}
+        }
+        this.currentConfig.events[eventName] = callback
       }
     },
 
-    // register event on jquery editor element
-    registerEvent: function(element, eventName, callback) {
+    registerEvents: function () {
+      // Handle initialized on its own.
+      this.registerInitialized()
 
-      if (!element || !eventName || !callback) {
-        return;
-      }
-
-      this.listeningEvents.push(eventName);
-      element.on(eventName, callback);
-    },
-
-    registerEvents: function() {
-
-      var events = this.currentConfig.events;
+      // Get current events.var events = this.currentConfig.events;
       if (!events) {
-        return;
+        return
       }
 
       for (var event in events) {
-        if (events.hasOwnProperty(event)) {
-          this.registerEvent(this._$element, event, events[event]);
+        if (events.hasOwnProperty(event) && event != 'initialized') {
+          this.registerEvent(event, events[event])
+        }
+      }
+    },
+
+    registerInitialized: function () {
+      // Bind initialized.
+      if (!this.currentConfig.events) {
+        this.currentConfig.events = {}
+      }
+
+      // Set original initialized event.
+      if (this.currentConfig.events.initialized) {
+        this.registerEvent('initialized', this.currentConfig.events.initialized)
+      }
+
+      // Bind initialized event.
+      this.currentConfig.events.initialized = () => {
+        for (var i = 0; i < this.initEvents.length; i++) {
+          this.initEvents[i].call(this._editor)
         }
       }
     }
-  }    
-};
+  }
+}
 
 var froalaView = {
 
@@ -277,12 +299,12 @@ var froalaView = {
 
   watch: {
     value: function (newValue) {
-      this._element.innerHTML = newValue;
+      this._element.innerHTML = newValue
     }
   },
 
   created: function () {
-    this.currentTag = this.tag || this.currentTag;
+    this.currentTag = this.tag || this.currentTag
   },
 
   render: function (createElement) {
@@ -295,11 +317,11 @@ var froalaView = {
   },
 
   // After first time render.
-  mounted: function() {
-    this._element = this.$el;
+  mounted: function () {
+    this._element = this.$el
 
     if (this.value) {
-       this._element.innerHTML = this.value
+      this._element.innerHTML = this.value
     }
   },
 
@@ -307,9 +329,9 @@ var froalaView = {
 
     return {
       currentTag: 'div',
-      _element: null,
-    };
+      _element: null
+    }
   }
-};
+}
 
-export {froalaEditor, froalaView};
+export { froalaEditor, froalaView }
