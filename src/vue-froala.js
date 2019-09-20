@@ -1,31 +1,31 @@
 import FroalaEditor from 'froala-editor'
 
-var froalaEditor = {
+const froalaEditor = {
 
   props: ['tag', 'value', 'config', 'onManualControllerReady'],
 
   watch: {
-    value: function () {
+    value () {
       this.model = this.value
       this.updateValue()
     }
   },
 
-  render: function (createElement) {
+  render (createElement) {
     return createElement(
       this.currentTag,
       [this.$slots.default]
     )
   },
 
-  created: function () {
+  created () {
     this.currentTag = this.tag || this.currentTag
     this.model = this.value
   },
 
   // After first time render.
-  mounted: function () {
-    if (this.SPECIAL_TAGS.indexOf(this.currentTag) != -1) {
+  mounted () {
+    if (this.SPECIAL_TAGS.indexOf(this.currentTag) !== -1) {
 
       this.hasSpecialTag = true
     }
@@ -37,15 +37,16 @@ var froalaEditor = {
     }
   },
 
-  beforeDestroy: function () {
+  beforeDestroy () {
     this.destroyEditor()
   },
 
-  data: function () {
+  data () {
 
     return {
+      initEvents: [],
 
-      initEvents: [],// Tag on which the editor is initialized.
+      // Tag on which the editor is initialized.
       currentTag: 'div',
 
       // Editor element.
@@ -71,15 +72,15 @@ var froalaEditor = {
     }
   },
   methods: {
-    updateValue: function () {
-      if (JSON.stringify(this.oldModel) == JSON.stringify(this.model)) {
+    updateValue () {
+      if (JSON.stringify(this.oldModel) === JSON.stringify(this.model)) {
         return
       }
 
       this.setContent()
     },
 
-    createEditor: function () {
+    createEditor () {
 
       if (this.editorInitialized) {
         return
@@ -97,13 +98,13 @@ var froalaEditor = {
       this.editorInitialized = true
     },
 
-    setContent: function (firstTime) {
+    setContent (firstTime) {
 
       if (!this.editorInitialized && !firstTime) {
         return
       }
 
-      if (this.model || this.model == '') {
+      if (this.model || this.model === '') {
 
         this.oldModel = this.model
 
@@ -115,7 +116,7 @@ var froalaEditor = {
       }
     },
 
-    setNormalTagContent: function (firstTime) {
+    setNormalTagContent (firstTime) {
 
       var self = this
 
@@ -139,15 +140,15 @@ var froalaEditor = {
 
     },
 
-    setSpecialTagContent: function () {
+    setSpecialTagContent () {
 
-      var tags = this.model
+      const tags = this.model
 
       // add tags on element
       if (tags) {
 
-        for (var attr in tags) {
-          if (tags.hasOwnProperty(attr) && attr != this.INNER_HTML_ATTR) {
+        for (const attr in tags) {
+          if (tags.hasOwnProperty(attr) && attr !== this.INNER_HTML_ATTR) {
             this.$el.setAttribute(attr, tags[attr])
           }
         }
@@ -158,7 +159,7 @@ var froalaEditor = {
       }
     },
 
-    destroyEditor: function () {
+    destroyEditor () {
 
       if (this._editor) {
 
@@ -169,14 +170,13 @@ var froalaEditor = {
       }
     },
 
-    getEditor: function () {
-
+    getEditor () {
       return this._editor
     },
 
-    generateManualController: function () {
+    generateManualController () {
 
-      var controls = {
+      const controls = {
         initialize: this.createEditor,
         destroy: this.destroyEditor,
         getEditor: this.getEditor
@@ -185,19 +185,20 @@ var froalaEditor = {
       this.onManualControllerReady(controls)
     },
 
-    updateModel: function () {
+    updateModel () {
 
-      var modelContent = ''
+      let modelContent = ''
 
       if (this.hasSpecialTag) {
 
-        var attributeNodes = this.$el[0].attributes
-        var attrs = {}
+        const attributeNodes = this.$el[0].attributes
+        const attrs = {}
 
-        for (var i = 0; i < attributeNodes.length; i++) {
+        let i
+        for (i = 0; i < attributeNodes.length; i++) {
 
-          var attrName = attributeNodes[i].name
-          if (this.currentConfig.vueIgnoreAttrs && this.currentConfig.vueIgnoreAttrs.indexOf(attrName) != -1) {
+          const attrName = attributeNodes[i].name
+          if (this.currentConfig.vueIgnoreAttrs && this.currentConfig.vueIgnoreAttrs.indexOf(attrName) !== -1) {
             continue
           }
           attrs[attrName] = attributeNodes[i].value
@@ -210,7 +211,7 @@ var froalaEditor = {
         modelContent = attrs
       } else {
 
-        var returnedHtml = this._editor.html.get()
+        const returnedHtml = this._editor.html.get()
         if (typeof returnedHtml === 'string') {
           modelContent = returnedHtml
         }
@@ -220,17 +221,16 @@ var froalaEditor = {
       this.$emit('input', modelContent)
     },
 
-    initListeners: function () {
-      var self = this
-
-      this.registerEvent('initialized', function () {
-        if (self._editor.events) {// bind contentChange and keyup event to froalaModel
-          self._editor.events.on('contentChanged', function () {
-            self.updateModel()
+    initListeners () {
+      this.registerEvent('initialized', () => {
+        if (this._editor.events) {
+          // bind contentChange and keyup event to froalaModel
+          this._editor.events.on('contentChanged', () => {
+            this.updateModel()
           })
-          if (self.currentConfig.immediateVueModelUpdate) {
-            self._editor.events.on('keyup', function () {
-              self.updateModel()
+          if (this.currentConfig.immediateVueModelUpdate) {
+            this._editor.events.on('keyup', () => {
+              this.updateModel()
             })
           }
         }
@@ -238,14 +238,14 @@ var froalaEditor = {
     },
 
     // register event on editor element
-    registerEvent: function (eventName, callback) {
+    registerEvent (eventName, callback) {
 
       if (!eventName || !callback) {
         return
       }
 
       // Initialized event.
-      if (eventName == 'initialized') {
+      if (eventName === 'initialized') {
 
         this.initEvents.push(callback)
       } else {
@@ -256,23 +256,25 @@ var froalaEditor = {
       }
     },
 
-    registerEvents: function () {
+    registerEvents () {
       // Handle initialized on its own.
       this.registerInitialized()
 
-      // Get current events.var events = this.currentConfig.events;
+      // Get current events.
+      const events = this.currentConfig.events
+
       if (!events) {
         return
       }
 
       for (var event in events) {
-        if (events.hasOwnProperty(event) && event != 'initialized') {
+        if (events.hasOwnProperty(event) && event !== 'initialized') {
           this.registerEvent(event, events[event])
         }
       }
     },
 
-    registerInitialized: function () {
+    registerInitialized () {
       // Bind initialized.
       if (!this.currentConfig.events) {
         this.currentConfig.events = {}
@@ -293,21 +295,23 @@ var froalaEditor = {
   }
 }
 
-var froalaView = {
+const froalaView = {
 
   props: ['tag', 'value'],
 
   watch: {
-    value: function (newValue) {
+    value (newValue) {
       this._element.innerHTML = newValue
     }
   },
 
-  created: function () {
-    this.currentTag = this.tag || this.currentTag
+  computed: {
+    currentTag () {
+      return this.tag || 'div'
+    }
   },
 
-  render: function (createElement) {
+  render (createElement) {
     return createElement(
       this.currentTag,
       {
@@ -317,7 +321,7 @@ var froalaView = {
   },
 
   // After first time render.
-  mounted: function () {
+  mounted () {
     this._element = this.$el
 
     if (this.value) {
@@ -325,10 +329,9 @@ var froalaView = {
     }
   },
 
-  data: function () {
+  data () {
 
     return {
-      currentTag: 'div',
       _element: null
     }
   }

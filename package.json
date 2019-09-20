@@ -23,19 +23,15 @@
     "rte",
     "javascript"
   ],
-  "main": "dist/index.mjs",
-  "module": "dist/index.mjs",
-  "jsnext:main": "dist/index.mjs",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "jsnext:main": "dist/index.esm.js",
   "files": [
-    "src",
-    "dist",
-    "es"
+    "dist"
   ],
   "scripts": {
     "dev": "node build/dev-server.js",
-    "build": "yarn run release && yarn run build:es",
-    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
-    "release": "SET NODE_ENV=production && webpack --progress --hide-modules --config  ./build/webpack.release.js && webpack --progress --hide-modules --config  ./build/webpack.release.min.js"
+    "build": "bili --format esm,cjs"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
@@ -53,6 +49,7 @@
     "@babel/runtime-corejs2": "^7.3.4",
     "babel-helpers": "^6.24.1",
     "babel-loader": "^8.0.5",
+    "bili": "^4.8.1",
     "connect-history-api-fallback": "^1.1.0",
     "cross-env": "^5.2.0",
     "cross-spawn": "^6.0.5",
