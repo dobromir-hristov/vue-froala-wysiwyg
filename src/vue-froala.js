@@ -95,7 +95,6 @@ const froalaEditor = {
       this.initListeners()
 
       this._editor = new FroalaEditor(this.$el, this.currentConfig)
-      this.editorInitialized = true
     },
 
     setContent (firstTime) {
@@ -121,13 +120,19 @@ const froalaEditor = {
       var self = this
 
       function htmlSet () {
-        self._editor.html.set(self.model || '')
+        // Check if editor not null
+        if (!self._editor) return
+
+        if (self._editor.html !== undefined) {
+          self._editor.html.set(self.model || '')
+        }
 
         //This will reset the undo stack everytime the model changes externally. Can we fix this?
 
-        self._editor.undo.saveStep()
-        self._editor.undo.reset()
-
+        if (self._editor.undo !== undefined) {
+          self._editor.undo.saveStep()
+          self._editor.undo.reset()
+        }
       }
 
       if (firstTime) {
@@ -162,11 +167,10 @@ const froalaEditor = {
     destroyEditor () {
 
       if (this._editor) {
-
+        this.initEvents = []
         this._editor.destroy()
         this.editorInitialized = false
         this._editor = null
-
       }
     },
 
@@ -223,6 +227,8 @@ const froalaEditor = {
 
     initListeners () {
       this.registerEvent('initialized', () => {
+        this.editorInitialized = true
+
         if (this._editor.events) {
           // bind contentChange and keyup event to froalaModel
           this._editor.events.on('contentChanged', () => {
